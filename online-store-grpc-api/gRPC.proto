@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package onlinestore;
+
+// Продукт
+message Product {
+    uint32 product_id = 1;
+    string name = 2;
+    string description = 3;
+    double price = 4;
+    uint32 quantity = 5;
+    repeated uint32 category_ids = 6;
+}
+
+// Категория
+message Category {
+    uint32 category_id = 1;
+    string name = 2;
+    repeated uint32 product_ids = 3;
+}
+
+// Фильтр по цене продукта (учебный пример)
+message PriceFilter {
+    uint32 max_price = 1;
+}
+
+// Пагинация по номеру страницы и количеству строк на странице (учебный пример)
+message ProductPagination {
+    uint32 page_number = 1;
+    uint32 page_limit = 2;
+}
+
+// Добавление продукта
+message AddProductRequest {
+    string name = 1;
+    string description = 2;
+}
+
+message AddProductResponse {
+    bool success = 1;
+    string name = 2;
+    string description = 3;
+}
+
+// Редактирование продукта
+message EditProductRequest {
+    uint32 product_id = 1;
+    string name = 2;
+    string description = 3;
+    double price = 4;
+    uint32 quantity = 5;
+    repeated uint32 category_ids = 6;
+}
+
+message EditProductResponse {
+    bool success = 1;
+    uint32 product_id = 2;
+    string name = 3;
+    string description = 4;
+    double price = 5;
+    uint32 quantity = 6;
+    repeated uint32 category_ids = 7;
+}
+
+// Удаление продукта. Ответ — статус
+message DeleteProductRequest {
+    uint32 product_id = 1;
+}
+
+// Добавление новой категории
+message AddCategoryRequest {
+    string name = 1;
+}
+
+message AddCategoryResponse {
+    bool success = 1;
+    string name = 2;
+}
+
+// Редактирование категории
+message EditCategoryRequest {
+    uint32 category_id = 1;
+    string name = 2;
+}
+
+message EditCategoryResponse {
+    bool success = 1;
+    uint32 category_id = 2;
+    string name = 3;
+}
+
+// Удаление категории. Ответ — статус
+message DeleteCategoryRequest {
+    uint32 category_id = 1;
+}
+
+// Назначение продукта в категорию
+message LinkProductToCategoryRequest {
+    uint32 product_id = 1;
+    uint32 category_id = 2;
+}
+
+// Отвязка продукта от категории
+message UnlinkProductFromCategoryRequest {
+    uint32 product_id = 1;
+    uint32 category_id = 2;
+}
+
+// Поиск данных о продукте по ID
+message GetProductRequest {
+    uint32 product_id = 1;
+}
+
+// Поиск данных о категории по ID
+message GetCategoryRequest {
+    uint32 category_id = 1;
+}
+
+// Статус успешности операции
+message StatusResponse {
+    bool success = 1;
+}
+
+// Запрос списка всех продуктов
+message ListProductsRequest {
+    uint32 page_size = 1;
+    uint32 page_number = 2;
+}
+
+message ListProductsResponse {
+    repeated Product products = 1;
+    uint32 next_page_number = 2;
+}
+
+// Запрос списка всех категорий
+message ListCategoriesRequest {
+    uint32 page_size = 1;
+    uint32 page_number = 2;
+}
+
+message ListCategoriesResponse {
+    repeated Category categories = 1;
+    uint32 next_page_number = 2;
+}
+
+// Сервисы
+service OnlineStore {
+    // Действия с продуктом
+    rpc AddProduct(AddProductRequest) returns (AddProductResponse);
+    rpc EditProduct(EditProductRequest) returns (EditProductResponse);
+    rpc DeleteProduct(DeleteProductRequest) returns (StatusResponse);
+
+    // Действия с категорией
+    rpc AddCategory(AddCategoryRequest) returns (AddCategoryResponse);
+    rpc EditCategory(EditCategoryRequest) returns (EditCategoryResponse);
+    rpc DeleteCategory(DeleteCategoryRequest) returns (StatusResponse);
+
+    // Привязка и отвязка продукта от категории
+    rpc LinkProductToCategory(LinkProductToCategoryRequest) returns (StatusResponse);
+    rpc UnlinkProductFromCategory(UnlinkProductFromCategoryRequest) returns (StatusResponse);
+
+    // Получение информации из БД
+    rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+    rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
+    rpc GetProduct(GetProductRequest) returns (Product);
+    rpc GetCategory(GetCategoryRequest) returns (Category);
+}
