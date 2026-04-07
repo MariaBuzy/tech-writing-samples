@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:tns="http://www.example.ru/taskmanagement"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://www.example.ru/taskmanagement">
+
+    <!-- Types - определение структуры XML-сообщений -->
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://www.example.ru/taskmanagement">
+            <xsd:element name="Task">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="TaskID" type="xsd:string"/>
+                        <xsd:element name="Title" type="xsd:string"/>
+                        <xsd:element name="Description" type="xsd:string"/>
+                        <xsd:element name="Status">
+                            <xsd:simpleType>
+                                <xsd:restriction base="xsd:string">
+                                    <xsd:enumeration value="New"/>
+                                    <xsd:enumeration value="In Progress"/>
+                                    <xsd:enumeration value="Completed"/>
+                                </xsd:restriction>
+                            </xsd:simpleType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
+
+    <!-- Messages - сообщения, используемые веб-сервисом -->
+    <wsdl:message name="CreateTaskRequest">
+        <wsdl:part name="task" element="tns:Task"/>
+    </wsdl:message>
+
+    <wsdl:message name="GetTaskRequest">
+        <wsdl:part name="TaskID" type="xsd:string"/>
+    </wsdl:message>
+
+    <wsdl:message name="UpdateTaskRequest">
+        <wsdl:part name="task" element="tns:Task"/>
+    </wsdl:message>
+
+    <wsdl:message name="DeleteTaskRequest">
+        <wsdl:part name="TaskID" type="xsd:string"/>
+    </wsdl:message>
+
+    <wsdl:message name="TaskResponse">
+        <wsdl:part name="task" element="tns:Task"/>
+    </wsdl:message>
+
+    <!-- PortType - список операций сервиса -->
+    <wsdl:portType name="TaskManagerPortType">
+        <wsdl:operation name="CreateTask">
+            <wsdl:documentation>Создаёт новую задачу.</wsdl:documentation>
+            <wsdl:input message="tns:CreateTaskRequest"/>
+            <wsdl:output message="tns:TaskResponse"/>
+        </wsdl:operation>
+
+        <wsdl:operation name="GetTask">
+            <wsdl:documentation>Возвращает задачу по идентификатору.</wsdl:documentation>
+            <wsdl:input message="tns:GetTaskRequest"/>
+            <wsdl:output message="tns:TaskResponse"/>
+        </wsdl:operation>
+
+        <wsdl:operation name="UpdateTask">
+            <wsdl:documentation>Обновляет существующую задачу.</wsdl:documentation>
+            <wsdl:input message="tns:UpdateTaskRequest"/>
+            <wsdl:output message="tns:TaskResponse"/>
+        </wsdl:operation>
+
+        <wsdl:operation name="DeleteTask">
+            <wsdl:documentation>Удаляет задачу по идентификатору.</wsdl:documentation>
+            <wsdl:input message="tns:DeleteTaskRequest"/>
+            <wsdl:output message="tns:TaskResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!-- Binding - способ доставки SOAP-сообщений -->
+    <wsdl:binding name="TaskManagementBinding" type="tns:TaskManagerPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <wsdl:operation name="CreateTask">
+            <soap:operation soapAction="http://www.example.ru/taskmanagement/CreateTask"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="GetTask">
+            <soap:operation soapAction="http://www.example.ru/taskmanagement/GetTask"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="UpdateTask">
+            <soap:operation soapAction="http://www.example.ru/taskmanagement/UpdateTask"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="DeleteTask">
+            <soap:operation soapAction="http://www.example.ru/taskmanagement/DeleteTask"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- Service - адрес, по которому доступен сервис -->
+    <wsdl:service name="TaskManagementService">
+        <wsdl:port name="TaskManagementPort" binding="tns:TaskManagementBinding">
+            <soap:address location="http://www.example.ru/taskmanagement"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>
