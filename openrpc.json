@@ -6,7 +6,7 @@
     "description": "JSON-RPC API для безопасного хранения и управления секретными пользовательскими данными (создание, получение, удаление записей).",
     "contact": {
       "name": "Secure Storage API Team",
-      "url": "https://github.com/maribuzy/secure-storage-api"
+      "url": "https://github.com/maribuzy/secure-storage-api/openrpc.json"
     },
     "license": {
       "name": "MIT License",
