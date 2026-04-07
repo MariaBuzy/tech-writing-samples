@@ -1,0 +1,231 @@
+{
+  "openrpc": "1.2.6",
+  "info": {
+    "version": "1.0.0",
+    "title": "secure_storage_api",
+    "description": "JSON-RPC API для безопасного хранения и управления секретными пользовательскими данными (создание, получение, удаление записей).",
+    "contact": {
+      "name": "Secure Storage API Team",
+      "url": "https://github.com/maribuzy/secure-storage-api"
+    },
+    "license": {
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "name": "secure_storage_server",
+      "url": "https://api.secure-storage.example.ru/{version}",
+      "variables": {
+        "version": {
+          "default": "v1",
+          "enum": ["v1", "v2", "v3"]
+        }
+      },
+      "summary": "Производственный сервер",
+      "description": "Высокозащищённый сервер для хранения и управления секретными пользовательскими данными."
+    }
+  ],
+  "methods": [
+    {
+      "name": "manageSecretData",
+      "summary": "Управление секретными пользовательскими данными (создание, получение, удаление).",
+      "description": "Метод позволяет создавать, получать и удалять записи с секретными данными пользователей. Доступ к операциям определяется уровнем доступа клиента.",
+      "params": [
+        {
+          "name": "action",
+          "description": "Операция над данными: add — создать запись, get — получить запись, delete — удалить запись.",
+          "schema": {
+            "type": "string",
+            "enum": ["add", "get", "delete"]
+          }
+        },
+        {
+          "name": "dataId",
+          "description": "Идентификатор записи с данными. Должен быть положительным целым числом.",
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        {
+          "name": "userData",
+          "description": "Данные для добавления при выполнении операции add. Передаются в виде объекта с произвольным набором полей.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "first_name": {
+                "type": "string"
+              },
+              "last_name": {
+                "type": "string"
+              },
+              "age": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        {
+          "name": "accessLevel",
+          "description": "Уровень доступа клиента: user — базовые операции чтения, admin — чтение и создание, superAdmin — чтение, создание и удаление.",
+          "schema": {
+            "type": "string",
+            "enum": ["user", "admin", "superAdmin"]
+          }
+        },
+        {
+          "name": "language",
+          "description": "Локаль для сообщений об ошибках и уведомлений. Определяет язык текстов в полях message.",
+          "schema": {
+            "type": "string",
+            "enum": ["ru-RU", "en-US", "fr-FR"]
+          }
+        }
+      ],
+      "result": {
+        "name": "manageSecretDataResult",
+        "description": "Стандартный объект результата выполнения метода.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["success", "error"]
+            },
+            "message": {
+              "type": "string"
+            },
+            "data": {
+              "description": "Опциональные данные результата операции (например, запрошенная запись).",
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "code": 100,
+          "message": "Недостаточно прав для выполнения операции.",
+          "data": "Клиент попытался выполнить операцию, требующую прав superAdmin, с более низким уровнем доступа."
+        },
+        {
+          "code": 101,
+          "message": "Ошибка записи данных.",
+          "data": "Произошла ошибка при записи данных в хранилище. Попробуйте повторить запрос позже."
+        },
+        {
+          "code": 102,
+          "message": "Ошибка чтения данных.",
+          "data": "Произошла ошибка при чтении данных из хранилища. Попробуйте повторить запрос позже."
+        }
+      ],
+      "examples": [
+        {
+          "name": "add_successfully",
+          "description": "Успешное добавление новой записи.",
+          "params": [
+            {
+              "name": "action",
+              "value": "add"
+            },
+            {
+              "name": "dataId",
+              "value": 888
+            },
+            {
+              "name": "userData",
+              "value": {
+                "first_name": "Татьяна",
+                "last_name": "Иванова",
+                "age": 45
+              }
+            },
+            {
+              "name": "accessLevel",
+              "value": "superAdmin"
+            },
+            {
+              "name": "language",
+              "value": "ru-RU"
+            }
+          ],
+          "result": {
+            "name": "add_successfully_result",
+            "value": {
+              "status": "success",
+              "message": "Запись успешно создана."
+            }
+          }
+        },
+        {
+          "name": "get_successfully",
+          "description": "Успешное получение существующей записи.",
+          "params": [
+            {
+              "name": "action",
+              "value": "get"
+            },
+            {
+              "name": "dataId",
+              "value": 888
+            },
+            {
+              "name": "accessLevel",
+              "value": "admin"
+            },
+            {
+              "name": "language",
+              "value": "en-US"
+            }
+          ],
+          "result": {
+            "name": "get_successfully_result",
+            "value": {
+              "status": "success",
+              "message": "Record has been retrieved successfully.",
+              "data": {
+                "first_name": "Tatiana",
+                "last_name": "Ivanova",
+                "age": 45
+              }
+            }
+          }
+        },
+        {
+          "name": "delete_forbidden_error",
+          "description": "Удаление записи невозможно из-за отсутствия прав superAdmin.",
+          "params": [
+            {
+              "name": "action",
+              "value": "delete"
+            },
+            {
+              "name": "dataId",
+              "value": 888
+            },
+            {
+              "name": "accessLevel",
+              "value": "user"
+            },
+            {
+              "name": "language",
+              "value": "ru-RU"
+            }
+          ],
+          "result": {
+            "name": "delete_forbidden_error_result",
+            "value": {
+              "status": "error",
+              "message": "Недостаточно прав для выполнения операции."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
