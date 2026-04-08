@@ -1,0 +1,383 @@
+openapi: 3.0.3
+info:
+    title: Library API
+    version: 1.0.0
+paths:
+    /books:
+        post:
+            summary: Добавить книгу в БД
+            description: Добавление новой книги в БД с заданными в схеме CreateBookRequest полями. Возвращает Book
+            requestBody:
+                description: Добавление новой книги в БД по схеме CreateBookRequest
+                required: true
+                content:
+                    application/json: 
+                      schema:
+                        $ref: '#/components/schemas/CreateBookRequest'
+            responses:
+                "201":
+                    description: Книга успешно добавлена
+                    content:                        
+                        application/json: 
+                          schema:
+                            $ref: '#/components/schemas/Book'
+                "400":
+                    description: Введены некорректные данные
+                "404":
+                    description: Автор с таким authorId не найден
+        get:
+            summary: Получить список книг
+            description: Получение списка книг с пагинацией по схеме BooksList
+            parameters:
+                - name: genre
+                  description: Фильтрация по жанру книги
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: page
+                  description: Номер страницы
+                  in: query
+                  required: false
+                  schema:
+                   type: integer
+                   minimum: 1
+                - name: size
+                  description: Количество элементов на странице
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    minimum: 1
+            responses:
+                "200":
+                    description: Список книг
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BooksList"
+    /books/{id}:
+        get:
+            summary: Получить информацию о книге по ID
+            description: Получение информации о книге по схеме Book
+            parameters: 
+              - name: id
+                in: path
+                description: Уникальный ID книги
+                required: true
+                schema:
+                    type: integer
+                    example: 123123
+            responses:
+                '200':
+                    description: Книга найдена
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Book"
+                "400":
+                    description: Некорректный идентификатор книги
+                "404":
+                    description: Книга с таким ID не найдена
+        put:
+            summary: Обновить информацию о книге
+            description: Редактирование информации о существующей книге по схеме CreateBookRequest
+            parameters: 
+              - name: id
+                in: path
+                description: Уникальный ID книги
+                required: true
+                schema: 
+                  type: integer
+                  example: 123
+            requestBody: 
+              description: Обновлённые данные книги по схеме CreateBookRequest
+              required: true
+              content:
+                application/json: 
+                  schema:
+                    $ref: "#/components/schemas/CreateBookRequest"
+            responses:
+                "200":
+                    description: Информация успешно обновлена
+                "400":
+                    description: Введены некорректные данные
+                "404":
+                    description: Книга с таким ID не найдена
+        delete:
+            summary: Удалить книгу
+            description: Удаление книги по ID
+            parameters: 
+              - name: id
+                in: path
+                description: Уникальный ID книги
+                required: true
+                schema:
+                    type: integer
+                    example: 123123
+            responses:
+                "204":
+                    description: Книга удалена 
+                "404":
+                    description: Книга с таким ID не найдена
+    /authors:
+        post:
+            summary: Добавить автора в БД
+            description: Добавление нового автора в БД с заданными в схеме CreateAuthorRequest полями. Возвращает Author
+            requestBody:
+                description: Добавление нового автора в БД с заданными в схеме CreateAuthorRequest полями
+                required: true
+                content:
+                    application/json: 
+                      schema:
+                        $ref: '#/components/schemas/CreateAuthorRequest'
+            responses:
+                "201":
+                    description: Автор успешно добавлен
+                    content:                        
+                        application/json: 
+                          schema:
+                            $ref: '#/components/schemas/Author'
+                "400":
+                    description: Введены некорректные данные
+                "409":
+                    description: Такой автор уже существует в БД
+        get:
+            summary: Получить список авторов
+            description: Получение списка авторов с пагинацией по схеме AuthorsList
+            parameters:                
+                - name: page
+                  description: Номер страницы
+                  in: query
+                  required: false
+                  schema:
+                   type: integer
+                   minimum: 1
+                - name: size
+                  description: Количество элементов на странице
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    minimum: 1
+            responses:
+                "200":
+                    description: Список авторов
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AuthorsList"
+    /authors/{id}:
+        get:
+            summary: Получить информацию об авторе по ID
+            description: Получение информации об авторе по схеме Author
+            parameters: 
+              - name: id
+                in: path
+                description: Уникальный ID автора
+                required: true
+                schema:
+                    type: integer
+                    example: 789789
+            responses:
+                '200':
+                    description: Автор найден
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Author"
+                "400":
+                    description: Некорректный ID автора
+                "404":
+                    description: Автор с таким ID не найден
+        put:
+            summary: Обновить информацию об авторе
+            description: Редактирование информации о существующем в БД авторе по схеме CreateAuthorRequest
+            parameters: 
+              - name: id
+                in: path
+                description: Уникальный ID автора
+                required: true
+                schema: 
+                  type: integer
+                  example: 123
+            requestBody: 
+              description: Обновлённые данные об авторе по схеме CreateAuthorRequest
+              required: true
+              content:
+                application/json: 
+                  schema:
+                    $ref: "#/components/schemas/CreateAuthorRequest"
+            responses:
+                "200":
+                    description: Информация успешно обновлена
+                "400":
+                    description: Введены некорректные данные
+                "404":
+                    description: Автор таким ID не найден
+        delete:
+            summary: Удалить автора
+            description: Удаление автора по ID
+            parameters: 
+              - name: id
+                in: path
+                description: Уникальный ID автора
+                required: true
+                schema:
+                    type: integer
+                    example: 789789
+            responses:
+                "204":
+                    description: Автор удален
+                "404":
+                    description: Автор с таким ID не найден
+components:
+    schemas:
+        CreateBookRequest:
+            description: Добавление новой книги в БД
+            type: object
+            properties:
+                title:
+                    type: string
+                    example: Скотный двор
+                genre:
+                    type: string
+                    example: Антиутопия
+                publicationYear:
+                    type: integer
+                    example: 1945
+                authorId:
+                    type: integer
+                    example: 7776
+            required:
+                - title
+                - genre
+                - publicationYear
+                - authorId
+        Book:
+            description: Полное представление книги, возвращаемое API
+            type: object
+            properties:
+                id:
+                    type: integer
+                    readOnly: true
+                    example: 123321
+                title:
+                    type: string
+                    example: Скотный двор
+                genre:
+                    type: string
+                    example: Антиутопия
+                publicationYear:
+                    type: integer
+                    example: 1945
+                authorId:
+                    type: integer
+                    example: 7776
+            required:
+                - id
+                - title
+                - genre
+                - publicationYear
+                - authorId
+        CreateAuthorRequest:
+            description: Добавление нового автора в БД
+            type: object
+            properties:
+                firstName:
+                    type: string
+                    example: Джордж
+                lastName:
+                    type: string
+                    example: Оруэлл
+                birthDate:
+                    type: string
+                    format: date
+                    example: 1903-06-25                
+            required:
+                - firstName
+                - lastName
+                - birthDate
+        Author:
+            description: Полное представление автора, возвращаемое API
+            type: object
+            properties:
+                id:
+                    type: integer
+                    readOnly: true
+                    example: 123321
+                firstName:
+                    type: string
+                    example: Джордж
+                lastName:
+                    type: string
+                    example: Оруэлл
+                birthDate:
+                    type: string
+                    format: date
+                    example: 1903-06-25
+                booksCount:
+                    type: integer
+                    readOnly: true
+                    description: Количество всех книг автора, добавленных в БД
+                    example: 10
+            required:
+                - id
+                - firstName
+                - lastName
+                - birthDate
+                - booksCount
+        BooksList:
+            description: Результат пагинированного запроса списка книг
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                         $ref: '#/components/schemas/Book'
+                    description: Список книг на текущей странице
+                page:
+                    type: integer
+                    description: Номер страницы
+                size:
+                    type: integer
+                    description: Количество объектов на странице
+                totalItems:
+                    type: integer
+                    description: Всего объектов в списке
+                totalPages:
+                    type: integer
+                    description: Всего страниц в списке
+            required:
+                - items
+                - page
+                - size
+                - totalItems
+                - totalPages
+        AuthorsList:
+            description: Результат пагинированного запроса списка авторов
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                         $ref: '#/components/schemas/Author'
+                    description: Список авторов на текущей странице
+                page:
+                    type: integer
+                    description: Номер страницы
+                size:
+                    type: integer
+                    description: Количество объектов на странице
+                totalItems:
+                    type: integer
+                    description: Всего объектов в списке
+                totalPages:
+                    type: integer
+                    description: Всего страниц в списке
+            required:
+                - items
+                - page
+                - size
+                - totalItems
+                - totalPages
