@@ -1,0 +1,246 @@
+openapi: "3.0.0"
+info:
+    title: "Чат-комната с Long Polling API"
+    version: "1.0.0"
+security:
+  - ApiKeyAuth: []
+paths:
+    /rooms:
+        post:
+            summary: Создание новой чат-комнаты
+            description: Создание новой чат-комнаты по схеме CreateChatRoomRequest. Возвращает ChatRoom.
+            requestBody:
+                description: Создание новой чат-комнаты по схеме CreateChatRoomRequest
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateChatRoomRequest'
+            responses:
+                "201":
+                    description: Чат-комната создана
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ChatRoom"
+                "400":
+                    description: Введены некорректные данные
+                "500":
+                    description: Внутренняя ошибка сервера
+    /rooms/{roomId}/participants:
+        post:
+            summary: Добавить участника в чат-комнату
+            description: Добавление существующего участника в указанную чат-комнату по схеме AddParticipantRequest. Ответ по схеме ChatRoom.
+            parameters:
+                - name: roomId
+                  in: path
+                  description: ID чат-комнаты
+                  required: true
+                  schema:
+                    type: integer
+                    example: 321
+            requestBody:
+                required: true
+                content:
+                    application/json: 
+                      schema: 
+                        $ref: "#/components/schemas/AddParticipantRequest"
+            responses:
+                "200":
+                    description: Участник добавлен в чат-комнату
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ChatRoom"
+                "400":
+                    description: Введены некорректные данные
+                "404":
+                    description: Пользователь или чат-комната не найдены
+    /rooms/{roomId}/participants/{participantId}:
+        delete:
+            summary: Удалить пользователя из чат-комнаты
+            description: Удаление пользователя из чат-комнаты. Возвращает ответ об успехе/ошибке
+            parameters: 
+              - name: roomId
+                in: path
+                description: ID чат-комнаты
+                required: true
+                schema:
+                    type: integer
+                    example: 321
+              - name: participantId
+                in: path
+                description: ID пользователя
+                required: true
+                schema:
+                    type: integer
+                    example: 123
+            responses:
+                "204":
+                    description: Участник удален из чат-комнаты
+                "400":
+                    description: Введен некорректный ID чат-комнаты или пользователя
+                "404":
+                    description: Пользователь или чат-комната не найдены
+    /rooms/{roomId}/messages:
+        post:
+            summary: Отправить сообщения в чат-комнату
+            description: Отправка сообщения в чат-комнату по схеме CreateMessageRequest. Возвращает объект Message.
+            parameters: 
+              - name: roomId
+                in: path
+                description: ID чат-комнаты
+                required: true
+                schema:
+                    type: integer
+                    example: 321
+            requestBody:
+                required: true
+                content:
+                    application/json: 
+                      schema: 
+                        $ref: "#/components/schemas/CreateMessageRequest"
+            responses:
+                "201":
+                    description: Сообщение отправлено
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Message"
+                "400":
+                    description: Введены некорректные данные
+                "404":
+                    description: Чат-комната не найдена
+        get:
+            summary: Получение сообщений в чат-комнате
+            description: Long Polling для получения новых сообщений в чат-комнате после указанного времени
+            parameters:
+                - name: roomId
+                  in: path
+                  description: ID чат-комнаты
+                  required: true
+                  schema:
+                    type: integer
+                    example: 321
+                - name: since
+                  in: query
+                  description: Дата и время, после которых нужно проверить и получить сообщения, если они есть.
+                  required: true
+                  schema:
+                    type: string
+                    format: date-time
+                    example: "2026-04-23T12:00:00Z"
+            responses:
+                "200":
+                    description: Список новых сообщений или пустой массив, если новых сообщений нет
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items: 
+                                    $ref: "#/components/schemas/Message"
+                "400":
+                    description: Введены некорректные данные
+                "404":
+                    description: Чат-комната не найдена
+
+components:
+    securitySchemes: 
+      ApiKeyAuth:
+        type: apiKey
+        in: header
+        name: X-API-Key
+        description: API-ключ участника чата. Передаётся в заголовке X-API-Key.
+
+    schemas:
+        Participant:
+            description: Участник чата
+            type: object
+            properties:
+                id:
+                    type: integer
+                    readOnly: true
+                    example: 1234
+                name:
+                    type: string
+                    example: Борис
+            required:
+                - id
+                - name
+        CreateChatRoomRequest:
+            description: Создание комнаты
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: Чат молчунов
+            required:
+                - name
+        ChatRoom:
+            type: object
+            description: Чат-комната
+            properties:
+                id:
+                    type: integer
+                    readOnly: true
+                    example: 321
+                name:
+                    type: string
+                    example: Чат молчунов
+                participants:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Participant'
+                    example:
+                        - id: 123 
+                          name: Борис
+            required:
+                - id
+                - name
+        AddParticipantRequest:
+            type: object
+            description: Добавление участника в чат
+            properties:
+                participantId: 
+                    type: integer
+                    description: ID участника
+                    example: 123
+            required: 
+              - participantId
+        CreateMessageRequest:
+            type: object
+            description: Отправка сообщения в чат-комнату
+            properties:
+                authorId:
+                    type: integer
+                    description: ID пользователя, отправляющего сообщение
+                    example: 123
+                text:
+                    type: string
+                    description: Текст сообщения
+                    example: Hello chat!
+            required:
+                - authorId
+                - text
+        Message:
+            type: object
+            description: Сообщение
+            properties: 
+              id:
+                type: integer
+                example: 456
+                readOnly: true
+              text:
+                type: string
+                example: Hello chat!
+              author:
+                $ref: '#/components/schemas/Participant'
+              sentAt:
+                type: string
+                format: date-time
+                readOnly: true
+            required: 
+              - id
+              - text              
+              - author
+              - sentAt
