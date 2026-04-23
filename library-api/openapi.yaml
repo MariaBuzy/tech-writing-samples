@@ -16,7 +16,7 @@ paths:
                         $ref: '#/components/schemas/CreateBookRequest'
             responses:
                 "201":
-                    description: Книга успешно добавлена
+                    description: Книга добавлена
                     content:                        
                         application/json: 
                           schema:
@@ -99,7 +99,7 @@ paths:
                     $ref: "#/components/schemas/CreateBookRequest"
             responses:
                 "200":
-                    description: Информация успешно обновлена
+                    description: Информация обновлена
                 "400":
                     description: Введены некорректные данные
                 "404":
@@ -133,7 +133,7 @@ paths:
                         $ref: '#/components/schemas/CreateAuthorRequest'
             responses:
                 "201":
-                    description: Автор успешно добавлен
+                    description: Автор добавлен
                     content:                        
                         application/json: 
                           schema:
@@ -210,7 +210,7 @@ paths:
                     $ref: "#/components/schemas/CreateAuthorRequest"
             responses:
                 "200":
-                    description: Информация успешно обновлена
+                    description: Информация обновлена
                 "400":
                     description: Введены некорректные данные
                 "404":
