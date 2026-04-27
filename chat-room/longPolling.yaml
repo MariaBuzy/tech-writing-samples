@@ -7,7 +7,7 @@ security:
 paths:
     /rooms:
         post:
-            summary: Создание новой чат-комнаты
+            summary: Создать новую чат-комнату
             description: Создание новой чат-комнаты по схеме CreateChatRoomRequest. Возвращает ChatRoom.
             requestBody:
                 description: Создание новой чат-комнаты по схеме CreateChatRoomRequest
@@ -84,8 +84,11 @@ paths:
                     description: Пользователь или чат-комната не найдены
     /rooms/{roomId}/messages:
         post:
-            summary: Отправить сообщения в чат-комнату
-            description: Отправка сообщения в чат-комнату по схеме CreateMessageRequest. Возвращает объект Message.
+            summary: Отправить сообщение
+            description: |
+                    Отправка сообщения от аутентифицированного пользователя.
+                    Автор определяется по API-ключу и не передается в теле запроса.
+                    Пользователь должен быть участником комнаты.
             parameters: 
               - name: roomId
                 in: path
@@ -109,11 +112,19 @@ paths:
                                 $ref: "#/components/schemas/Message"
                 "400":
                     description: Введены некорректные данные
+                "401":
+                    description: Неавторизованный запрос
+                "403":
+                    description: Пользователь не состоит в комнате
                 "404":
                     description: Чат-комната не найдена
         get:
-            summary: Получение сообщений в чат-комнате
-            description: Long Polling для получения новых сообщений в чат-комнате после указанного времени
+            summary: Long Polling получение новых сообщений
+            description: |
+             Сервер удерживает соединение открытым до появления новых сообщений
+             после указанного времени (since) или до истечения timeoutSeconds.
+             Если новые сообщения появляются - возвращается 200 и список сообщений.
+             Если за timeoutSeconds новых сообщений нет, то возвращается 204 без тела.
             parameters:
                 - name: roomId
                   in: path
@@ -125,11 +136,19 @@ paths:
                 - name: since
                   in: query
                   description: Дата и время, после которых нужно проверить и получить сообщения, если они есть.
-                  required: true
+                  required: false
                   schema:
                     type: string
                     format: date-time
                     example: "2026-04-23T12:00:00Z"
+                - name: timeoutSeconds
+                  in: query
+                  required: false
+                  description: Максимальное время ожидания новых сообщений
+                  schema:
+                    type: integer
+                    default: 30
+                    example: 30
             responses:
                 "200":
                     description: Список новых сообщений или пустой массив, если новых сообщений нет
@@ -139,8 +158,14 @@ paths:
                                 type: array
                                 items: 
                                     $ref: "#/components/schemas/Message"
+                "204":
+                    description: Нет новых сообщений за время ожидания                
                 "400":
                     description: Введены некорректные данные
+                "401":
+                    description: Неавторизованный запрос (отсутствует или неверный API-ключ)
+                "403":
+                    description: Пользователь не является участником комнаты
                 "404":
                     description: Чат-комната не найдена
 
@@ -199,7 +224,7 @@ components:
                 - name
         AddParticipantRequest:
             type: object
-            description: Добавление участника в чат
+            description: Добавление участника в чат-комнату
             properties:
                 participantId: 
                     type: integer
@@ -209,18 +234,15 @@ components:
               - participantId
         CreateMessageRequest:
             type: object
-            description: Отправка сообщения в чат-комнату
-            properties:
-                authorId:
-                    type: integer
-                    description: ID пользователя, отправляющего сообщение
-                    example: 123
+            description: |
+                Данные для отправки сообщения.
+                Автор определяется на сервере по API-ключу.
+            properties:                
                 text:
                     type: string
                     description: Текст сообщения
                     example: Hello chat!
             required:
-                - authorId
                 - text
         Message:
             type: object
